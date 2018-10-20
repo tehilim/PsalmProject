@@ -1,0 +1,71 @@
+<project
+    xmlns="http://maven.apache.org/POM/4.0.0"   
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"  
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+    <!-- groupId derived from https://github.com/tehilim -->
+    <groupId>com.github.tehilim</groupId>  
+    <!-- artifactId is the project name used in github -->
+    <artifactId>PsalmProject</artifactId>
+    <!-- Follow the rules of Semantic Versioning, https://semver.org/ -->
+    <version>0.1.0</version>
+
+    <name>Studying the Psalms</name>
+    <url>https://github.com/tehilim/PsalmProject</url>
+
+    <issueManagement>
+        <url>https://github.com/tehilim/PsalmProject/issues</url>
+        <system>GitHub Issues</system>
+    </issueManagement>
+
+    <licenses>
+        <license>
+            <name>MIT License</name>
+            <url>http://www.opensource.org/licenses/mit-license.php</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <scm>
+        <url>https://github.com/tehilim/PsalmProject/</url>
+        <connection>scm:git:git://github.com/tehilim/PsalmProject.git</connection>
+        <developerConnection>scm:git:git@github.com:tehilim/PsalmProject.git</developerConnection>
+    </scm>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <dependencies>
+        <dependency>  
+            <groupId>junit</groupId>  
+            <artifactId>junit</artifactId>  
+            <version>4.8.2</version>  
+            <scope>test</scope>  
+        </dependency>
+
+        <!-- Spring Framework -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
+            <version>2.0.6.RELEASE</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+            <version>2.0.6.RELEASE</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-thymeleaf</artifactId>
+            <version>2.0.6.RELEASE</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-devtools</artifactId>
+            <version>2.0.6.RELEASE</version>
+        </dependency>
+    </dependencies>
+
+</project>
