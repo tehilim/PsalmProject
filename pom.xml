@@ -10,6 +10,18 @@
     <artifactId>PsalmProject</artifactId>
     <!-- Follow the rules of Semantic Versioning, https://semver.org/ -->
     <version>0.1.0</version>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>8</source>
+                    <target>8</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
     <name>Studying the Psalms</name>
     <url>https://github.com/tehilim/PsalmProject</url>
