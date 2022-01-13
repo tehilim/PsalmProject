@@ -16,8 +16,8 @@ public class LearnXOR implements Runnable {
 
     @Override
     public void run() {
-        Network[] candidates = new Network[5];
-        byte[] errorCount = new byte[5];
+        Network[] candidates = new Network[20];
+        byte[] errorCount = new byte[20];
         for (int i = 0; i < candidates.length; i++) {
             candidates[i] = new Network(i,2, 2, 1);
         }
@@ -25,10 +25,10 @@ public class LearnXOR implements Runnable {
             // Check the candidates for errors
             for (Network network : candidates) {
                 errorCount[network.getId()] = 0;
-                if (network.getOutputsFor(0.0f, 0.0f)[0] <= 0.5f) errorCount[network.getId()]++;
-                if (network.getOutputsFor(1.0f, 0.0f)[0] >= 0.5f) errorCount[network.getId()]++;
-                if (network.getOutputsFor(0.0f, 1.0f)[0] >= 0.5f) errorCount[network.getId()]++;
-                if (network.getOutputsFor(1.0f, 1.0f)[0] <= 0.5f) errorCount[network.getId()]++;
+                if (network.getOutputsFor(0.0f, 0.0f)[0] <= 0.67f) errorCount[network.getId()]++;
+                if (network.getOutputsFor(1.0f, 0.0f)[0] >= 0.33f) errorCount[network.getId()]++;
+                if (network.getOutputsFor(0.0f, 1.0f)[0] >= 0.33f) errorCount[network.getId()]++;
+                if (network.getOutputsFor(1.0f, 1.0f)[0] <= 0.67f) errorCount[network.getId()]++;
             }
             // Sort the candidates by number of errors
             Arrays.sort(candidates, Comparator.comparingInt(network -> errorCount[network.getId()]));
