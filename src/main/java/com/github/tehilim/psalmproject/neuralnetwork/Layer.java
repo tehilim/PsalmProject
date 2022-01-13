@@ -1,5 +1,6 @@
 package com.github.tehilim.psalmproject.neuralnetwork;
 
+import java.util.Arrays;
 import java.util.Random;
 
 public class Layer {
@@ -13,7 +14,7 @@ public class Layer {
     }
 
     public Layer(Layer otherLayer) {
-        initializeWeights(otherLayer.weights[0].length, otherLayer.weights.length);
+        initializeWeights(otherLayer.weights[0].length - 1, otherLayer.weights.length);
         copyWeightsFrom(otherLayer);
     }
 
@@ -25,6 +26,23 @@ public class Layer {
         for (int i = 0; i < weights.length; i++) {
             for (int j = 0; j < weights[i].length; j++) {
                 weights[i][j] = random.nextFloat() * (random.nextBoolean() ? 1 : -1);
+            }
+        }
+    }
+
+    public void crossover(Layer otherLayer) {
+        if (otherLayer.weights.length != weights.length) {
+            throw new IllegalArgumentException("layers must have equal size");
+        }
+        if (otherLayer.weights[0].length != weights[0].length) {
+            throw new IllegalArgumentException("layers must have equal size");
+        }
+        Random random = new Random(System.currentTimeMillis());
+        for (int i = 0; i < weights.length; i++) {
+            for (int j = 0; j < weights[i].length; j++) {
+                if (random.nextBoolean()) {
+                    weights[i][j] = otherLayer.weights[i][j];
+                }
             }
         }
     }
@@ -77,7 +95,20 @@ public class Layer {
         while (count-- > 0) {
             int column = random.nextInt(weights.length);
             int row = random.nextInt(weights[0].length);
-            weights[column][row] = random.nextFloat() * (random.nextBoolean() ? 1 : -1);
+            weights[column][row] += random.nextFloat()  * (random.nextBoolean() ? 0.1 : -0.1);
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Layer layer = (Layer) o;
+        return Arrays.deepEquals(weights, layer.weights);
+    }
+
+    @Override
+    public int hashCode() {
+        return Arrays.deepHashCode(weights);
     }
 }
