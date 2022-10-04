@@ -25,7 +25,7 @@ public final class UDPFileServer implements Runnable {
     public static void main(String[] args) {
         ExecutorService executorService = Executors.newCachedThreadPool();
         boolean running = true;
-        try (DatagramSocket serverSocket = new DatagramSocket(8323)) {
+        try (DatagramSocket serverSocket = new DatagramSocket(8080)) {
             while (running) {
                 final DatagramPacket request = new DatagramPacket(new byte[576], 576);
                 try {
@@ -33,7 +33,7 @@ public final class UDPFileServer implements Runnable {
                     UDPFileServer udpFileServer = new UDPFileServer(serverSocket, request);
                     executorService.submit(udpFileServer);
                     running = !udpFileServer.exitRequested();
-                } catch (IOException e){
+                } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
@@ -77,19 +77,25 @@ public final class UDPFileServer implements Runnable {
             // Validate the request
             if (!"GET".equals(requestParts.get("method"))) {
                 // TODO: Send HTTP/1.1 501 Not Implemented
+                System.err.println("HTTP/1.1 501 Not Implemented");
+                return;
             }
             if (!"HTTP/1.1".equals(requestParts.get("version"))) {
                 // TODO: Send HTTP/1.1 505 Version Not Supported
+                System.err.println("HTTP/1.1 505 Version Not Supported");
+                return;
             }
             String uri = requestParts.get("uri");
-            if (uri == null || uri.length() == 0) {
-                // TODO: Send HTTP/1.1 400 Bad Request
+            if (uri == null || uri.length() == 0 || "/".equals(uri)) {
+                uri = "/index.html";
             }
             String host = headers.get("host");
             Path hostPath = Paths.get(host);
             // The (virtual) host must be an existing directory on the server
             if (!Files.exists(hostPath) || !Files.isDirectory(hostPath)) {
                 // TODO: Send HTTP/1.1 404 Not Found
+                System.err.println("HTTP/1.1 404 Not Found (" + hostPath + ")");
+                return;
             }
             // Always interpret the uri relative to the host (as direct file or file in subdirectory)
             if (uri.charAt(0) != '/') {
@@ -99,6 +105,8 @@ public final class UDPFileServer implements Runnable {
             // Can only serve files (not directories) that actually exist
             if (!Files.exists(fullPath) || Files.isDirectory(fullPath)) {
                 // TODO: Send HTTP/1.1 404 Not Found
+                System.err.println("HTTP/1.1 404 Not Found (" + fullPath + ")");
+                return;
             }
 
             // Who (request.getAddress() & request.getPort()) requested which
@@ -109,6 +117,8 @@ public final class UDPFileServer implements Runnable {
             long longFileSize = Files.size(fullPath);
             if (longFileSize > Integer.MAX_VALUE) {
                 // TODO: Send HTTP/1.1 500 Internal Server Error
+                System.err.println("HTTP/1.1 500 Internal Server Error (" + longFileSize + " > Integer.MAX_VALUE)");
+                return;
             }
             int fileSize = (int) longFileSize;
             int rangeStart = 0, rangeEnd = fileSize - 1;
@@ -117,11 +127,16 @@ public final class UDPFileServer implements Runnable {
                 int dashIndex = range.indexOf('-');
                 if (dashIndex <= 0) {
                     // TODO: Send HTTP/1.1 400 Bad Request
+                    System.err.println("HTTP/1.1 400 Bad Request (no dash)");
+                    return;
                 }
                 try {
                     rangeStart = Integer.parseUnsignedInt(range, 0, dashIndex, 10);
                 } catch (Exception e) {
                     // TODO: Send HTTP/1.1 400 Bad Request
+                    System.err.println("HTTP/1.1 400 Bad Request (range start)");
+                    e.printStackTrace();
+                    return;
                 }
                 try {
                     int i = Integer.parseUnsignedInt(range, dashIndex + 1, range.length(), 10);
@@ -131,23 +146,30 @@ public final class UDPFileServer implements Runnable {
                     }
                 } catch (Exception e) {
                     // TODO: Send HTTP/1.1 400 Bad Request
+                    System.err.println("HTTP/1.1 400 Bad Request (range end)");
+                    e.printStackTrace();
+                    return;
                 }
             }
             if (rangeEnd < rangeStart || rangeStart >= fileSize) {
                 // TODO: Send HTTP/1.1 416 Range Not Satisfiable
                 // Content-Range: bytes */fileSize
+                System.err.println("HTTP/1.1 416 Range Not Satisfiable");
+                return;
             }
 
             File file = fullPath.toFile();
             RandomAccessFile randomAccessFile = new RandomAccessFile(file, "r");
-            byte[] payload = new byte[rangeEnd - rangeStart + 1];
-            int bytesRead = randomAccessFile.read(payload, rangeStart, rangeEnd + 1);
+            int rangeLength = rangeEnd - rangeStart + 1;
+            byte[] payload = new byte[rangeLength];
+            randomAccessFile.seek(rangeStart);
+            int bytesRead = randomAccessFile.read(payload, 0, rangeLength);
             // Note: the number of bytes read may be lower than the number requested
 
             // Send HTTP/1.1 206 Partial Content
             byte[] headers =
                 ( "HTTP/1.1 206 Partial Content\r\n"
-                + "Content-Range: bytes " + rangeStart + "-" + bytesRead + "/" + fileSize + "\r\n"
+                + "Content-Range: bytes " + rangeStart + "-" + (rangeStart + bytesRead - 1) + "/" + fileSize + "\r\n"
                 + "Content-Length: " + bytesRead + "\r\n"
                 + "Content-Type: application/octet-stream\r\n"
                 + "\r\n"
@@ -161,6 +183,9 @@ public final class UDPFileServer implements Runnable {
             }
         } catch (Exception e) {
             // TODO: TODO: Send HTTP/1.1 500 Internal Server Error
+            System.err.println("HTTP/1.1 500 Internal Server Error (" + e.getMessage() + ")");
+            e.printStackTrace();
+            return;
         }
     }
 
