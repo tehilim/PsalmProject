@@ -23,7 +23,7 @@ class UDPFileServerTest {
             socket.send(request);
             byte[] buffer = new byte[600];
             DatagramPacket response = new DatagramPacket(buffer, buffer.length);
-            socket.setSoTimeout(2);
+            socket.setSoTimeout(5);
             socket.receive(response);
             System.out.println(new String(response.getData(), 0, response.getLength(), ISO_8859_1));
         } catch (UnknownHostException ex) {
@@ -31,7 +31,7 @@ class UDPFileServerTest {
         } catch (SocketException ex) {
             ex.printStackTrace();
         } catch (SocketTimeoutException e) {
-            System.out.println("Exit due to timeout.");
+            System.out.println("Exit due to timeout " + e.getMessage());
         } catch (IOException e) {
             e.printStackTrace();
         }
